@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,7 +33,7 @@ public class ForceUpdate {
 
     public static ForceUpdate get() {
         if(instance==null)
-        instance = new ForceUpdate();
+            instance = new ForceUpdate();
         return instance;
     }
 
@@ -78,30 +79,30 @@ public class ForceUpdate {
         }else {
             final Dialog dialog = new Dialog(activity);
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            dialog.setContentView(R.layout.dialog_update);
+            dialog.setContentView(R.layout.dialog_update2);
             dialog.setCancelable(force.getFlag()== Force.Flag.SHOW_CANCELABLE);
 
             TextView tvTitle = dialog.findViewById(R.id.tvTitle);
             TextView tvMessage = dialog.findViewById(R.id.tvMessage);
-            TextView tvUpdate = dialog.findViewById(R.id.tvUpdate);
-            TextView tvLater = dialog.findViewById(R.id.tvLater);
+            Button btnUpdate = dialog.findViewById(R.id.btnUpdate);
+            TextView btnLater = dialog.findViewById(R.id.btnLater);
             View vLater = dialog.findViewById(R.id.viewLater);
 
             if(force.getFlag()== Force.Flag.SHOW_NOT_CANCELABLE){
-                tvLater.setVisibility(View.GONE);
+                btnLater.setVisibility(View.GONE);
                 vLater.setVisibility(View.GONE);
             }
 
             tvTitle.setText(force.getTitle());
             tvMessage.setText(force.getMessage());
             final Force finalForce1 = force;
-            tvUpdate.setOnClickListener(new View.OnClickListener() {
+            btnUpdate.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    goToStore(activity, finalForce1.getAppId());
+                    goToStore(activity, finalForce1.getUpdateLink());
                 }
             });
-            tvLater.setOnClickListener(new View.OnClickListener() {
+            btnLater.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     dialog.dismiss();
@@ -170,14 +171,20 @@ public class ForceUpdate {
         void onSuccess(Force force);
     }
 
-    final String MARKET_DETAILS_ID = "market://details?id=";
-    final String PLAY_STORE_LINK = "https://play.google.com/store/apps/details?id=";
-    private void goToStore(Context context, String appId) {
-        try {
-            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(MARKET_DETAILS_ID + appId)));
-        } catch (android.content.ActivityNotFoundException anfe) {
-            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(PLAY_STORE_LINK + appId)));
+    private void goToStore(Context context, String url) {
+        if(url.contains("https://play.google.com/")){
+            String MARKET_DETAILS_ID = "market://details?id=";
+            String PLAY_STORE_LINK = "https://play.google.com/store/apps/details?id=";
+            String link = url.replace(PLAY_STORE_LINK,"");
+            try {
+                context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(MARKET_DETAILS_ID +link)));
+            } catch (android.content.ActivityNotFoundException anfe) {
+                context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(PLAY_STORE_LINK +link)));
+            }
+        }else {
+            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
         }
+
     }
 
 }

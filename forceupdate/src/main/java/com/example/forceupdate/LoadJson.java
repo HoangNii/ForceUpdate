@@ -2,7 +2,7 @@ package com.example.forceupdate;
 
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-
+import android.util.Log;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -33,6 +33,7 @@ public class LoadJson extends AsyncTask<String,Void,String> {
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
         if(s!=null){
+            Log.e("hoang",s);
             preferences.edit().putString(ForceUpdate.KEY_SAVE,s).apply();
         }
     }

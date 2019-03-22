@@ -3,7 +3,6 @@ package com.example.myapplication;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Toast;
-
 import com.example.forceupdate.Force;
 import com.example.forceupdate.ForceUpdate;
 
