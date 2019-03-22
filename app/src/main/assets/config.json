@@ -1,0 +1,8 @@
+{
+    "app_id":"com.eztech.gps.maps",
+    "app_code":"23",
+    "force_update":"1",
+    "title":"Update App",
+    "message":"GPS Maps have new version. Please update for more useful features!",
+    "update_link":"https://play.google.com/store/apps/details?id=com.eztech.gps.maps"
+}
