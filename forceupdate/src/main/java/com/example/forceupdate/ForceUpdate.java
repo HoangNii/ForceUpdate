@@ -3,14 +3,16 @@ package com.example.forceupdate;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,7 +49,7 @@ public class ForceUpdate {
         return this;
     }
 
-    public void check(Activity activity){
+    public void check(final Activity activity){
 
         if(loadJson==null||loadJson.getStatus()!= AsyncTask.Status.RUNNING){
             loadJson = new LoadJson(PreferenceManager.getDefaultSharedPreferences(activity));
@@ -57,10 +59,17 @@ public class ForceUpdate {
         Force force = getForce(activity);
         if(force==null){
             force = new Force();
+            force.setAppCode(0);
             force.setFlag(Force.Flag.NOT_SHOW);
             if(onListen!=null)onListen.onSuccess(force);
             return;
         }
+
+        if(BuildConfig.VERSION_CODE>=force.getAppCode()){
+            if(onListen!=null)onListen.onSuccess(force);
+            return;
+        }
+
 
         if(useCustom){
             if(onListen!=null)onListen.onSuccess(force);
@@ -85,10 +94,11 @@ public class ForceUpdate {
 
             tvTitle.setText(force.getTitle());
             tvMessage.setText(force.getMessage());
+            final Force finalForce1 = force;
             tvUpdate.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    goToStore(activity, finalForce1.getAppId());
                 }
             });
             tvLater.setOnClickListener(new View.OnClickListener() {
@@ -144,6 +154,8 @@ public class ForceUpdate {
                 force.setMessage(message);
                 force.setUpdateLink(link);
 
+                return force;
+
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -156,6 +168,16 @@ public class ForceUpdate {
 
     public interface OnListen{
         void onSuccess(Force force);
+    }
+
+    final String MARKET_DETAILS_ID = "market://details?id=";
+    final String PLAY_STORE_LINK = "https://play.google.com/store/apps/details?id=";
+    private void goToStore(Context context, String appId) {
+        try {
+            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(MARKET_DETAILS_ID + appId)));
+        } catch (android.content.ActivityNotFoundException anfe) {
+            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(PLAY_STORE_LINK + appId)));
+        }
     }
 
 }
