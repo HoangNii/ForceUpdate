@@ -1,6 +1,8 @@
 package com.example.forceupdate;
 
-public class Force {
+import java.io.Serializable;
+
+public class Force implements Serializable {
     private String appId;
     private int appCode;
     private Flag flag;

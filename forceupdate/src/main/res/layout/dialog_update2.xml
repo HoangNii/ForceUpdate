@@ -1,72 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content">
-
-    <RelativeLayout
-        android:id="@+id/toolbar"
-        android:background="#0B8797"
-        android:layout_width="match_parent"
-        android:layout_height="45dp">
-        <TextView
-            android:id="@+id/tvTitle"
-            android:gravity="center"
-            android:textColor="#fff"
-            style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
-            android:text="UPDATE APP"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </RelativeLayout>
-    <LinearLayout
-        android:layout_margin="10dp"
-        android:layout_width="match_parent"
+    <TextView
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:gravity="center_vertical"
+        android:id="@+id/tvTitle"
+        android:textColor="#352F2F"
+        style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+        android:text="Update App"
+        android:layout_marginBottom="-10dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <TextView
-            android:id="@+id/tvMessage"
-            android:textColor="#353434"
-            android:textSize="15sp"
-            android:text="GPS Maps have new version. Please update for more useful features!"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+        android:layout_marginLeft="20dp" />
+    <TextView
+        android:layout_margin="20dp"
+        android:id="@+id/tvMessage"
+        android:textColor="#353434"
+        android:textSize="15sp"
+        android:text="GPS Maps have new version. Please update for more useful features!"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
     <LinearLayout
-        android:layout_marginBottom="-1dp"
+        android:layout_marginEnd="10dp"
+        android:layout_gravity="end"
         android:id="@+id/viewButton"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:baselineAligned="false">
-        <FrameLayout
-            android:id="@+id/viewLater"
-            android:background="@drawable/bg_btn_dialog"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <Button
-                android:textColor="#A29F9F"
-                android:textAllCaps="false"
-                android:background="@drawable/fg_btn_click"
-                android:text="Later"
-                android:id="@+id/btnLater"
-                android:layout_width="match_parent"
-                android:layout_height="50dp" />
-        </FrameLayout>
-        <FrameLayout
-            android:background="@drawable/bg_btn_dialog"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <Button android:background="@drawable/fg_btn_click"
-                android:textColor="#159619"
-                android:layout_marginStart="-1dp"
-                android:text="Update"
-                android:id="@+id/btnUpdate"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginLeft="-1dp" />
-        </FrameLayout>
-
+        android:layout_marginRight="10dp">
+        <Button
+            android:textColor="#009688"
+            android:text="LATER"
+            android:id="@+id/btnLater"
+            android:background="?selectableItemBackground"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Button
+            android:textColor="#009688"
+            android:text="Update"
+            android:id="@+id/btnUpdate"
+            android:background="?selectableItemBackground"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 </LinearLayout>

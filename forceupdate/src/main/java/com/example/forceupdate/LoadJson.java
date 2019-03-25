@@ -1,18 +1,16 @@
 package com.example.forceupdate;
 
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.util.Log;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
 public class LoadJson extends AsyncTask<String,Void,String> {
 
-    private SharedPreferences preferences;
+    private onListen onListen;
 
-    LoadJson(SharedPreferences preferences) {
-        this.preferences = preferences;
+    public LoadJson(LoadJson.onListen onListen) {
+        this.onListen = onListen;
     }
 
     @Override
@@ -32,10 +30,12 @@ public class LoadJson extends AsyncTask<String,Void,String> {
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        if(s!=null){
-            Log.e("hoang",s);
-            preferences.edit().putString(ForceUpdate.KEY_SAVE,s).apply();
-        }
+        onListen.onLoad(s);
+    }
+
+
+    public interface onListen{
+        void onLoad(String s);
     }
 
 }

@@ -1,131 +1,98 @@
 package com.example.forceupdate;
 
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.preference.PreferenceManager;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ForceUpdate {
+import java.lang.ref.WeakReference;
 
-    static final  String KEY_SAVE = "force_update";
-
-    private static ForceUpdate instance;
+public enum  ForceUpdate {
+    get;
 
     private String url;
 
-    private boolean useCustom;
+    private Dialog dialog;
 
-    private LoadJson loadJson;
+    private WeakReference<Activity> activity;
 
-    private OnListen onListen;
-
-    public static ForceUpdate get() {
-        if(instance==null)
-            instance = new ForceUpdate();
-        return instance;
-    }
-
-    public ForceUpdate urlLoad(String s){
+    public ForceUpdate setUrl(String s){
         this.url = s;
         return this;
     }
-    public ForceUpdate useCustomDialog(Boolean bl){
-        this.useCustom = bl;
-        return this;
-    }
-    public ForceUpdate listen(OnListen onListen){
-        this.onListen = onListen;
-        return this;
+
+    public void setActivity(Activity activity) {
+        this.activity = new WeakReference<>(activity);
     }
 
-    public void check(final Activity activity){
+    public boolean isShow(){
+        return dialog!=null&&dialog.isShowing();
+    }
+    public void getDialogDismiss(DialogInterface.OnDismissListener onDismissListener){
+        dialog.setOnDismissListener(onDismissListener);
+    }
 
-        if(loadJson==null||loadJson.getStatus()!= AsyncTask.Status.RUNNING){
-            loadJson = new LoadJson(PreferenceManager.getDefaultSharedPreferences(activity));
-            loadJson.execute(url);
-        }
+    public void syn(){
+        LoadJson loadJson = new LoadJson(new LoadJson.onListen() {
+            @Override
+            public void onLoad(String s) {
+                final Force force = getForce(s);
 
-        Force force = getForce(activity);
-        if(force==null){
-            force = new Force();
-            force.setAppCode(0);
-            force.setFlag(Force.Flag.NOT_SHOW);
-            if(onListen!=null)onListen.onSuccess(force);
-            return;
-        }
+                if (force != null) {
 
-        if(BuildConfig.VERSION_CODE>=force.getAppCode()){
-            if(onListen!=null)onListen.onSuccess(force);
-            return;
-        }
+                    if (BuildConfig.VERSION_CODE >= force.getAppCode()) return;
 
+                    if (force.getFlag() == Force.Flag.NOT_SHOW) return;
 
-        if(useCustom){
-            if(onListen!=null)onListen.onSuccess(force);
-        } else if(force.getFlag()== Force.Flag.NOT_SHOW){
-            if(onListen!=null)onListen.onSuccess(force);
-        }else {
-            final Dialog dialog = new Dialog(activity);
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            dialog.setContentView(R.layout.dialog_update2);
-            dialog.setCancelable(force.getFlag()== Force.Flag.SHOW_CANCELABLE);
+                    if (activity.get() == null) return;
 
-            TextView tvTitle = dialog.findViewById(R.id.tvTitle);
-            TextView tvMessage = dialog.findViewById(R.id.tvMessage);
-            Button btnUpdate = dialog.findViewById(R.id.btnUpdate);
-            TextView btnLater = dialog.findViewById(R.id.btnLater);
-            View vLater = dialog.findViewById(R.id.viewLater);
+                    dialog = new Dialog(activity.get());
+                    dialog.setContentView(R.layout.dialog_update2);
+                    dialog.setCancelable(force.getFlag() == Force.Flag.SHOW_CANCELABLE);
 
-            if(force.getFlag()== Force.Flag.SHOW_NOT_CANCELABLE){
-                btnLater.setVisibility(View.GONE);
-                vLater.setVisibility(View.GONE);
+                    TextView tvTitle = dialog.findViewById(R.id.tvTitle);
+                    TextView tvMessage = dialog.findViewById(R.id.tvMessage);
+                    final Button btnLater = dialog.findViewById(R.id.btnLater);
+                    Button btnUpdate = dialog.findViewById(R.id.btnUpdate);
+
+                    if (force.getFlag() == Force.Flag.SHOW_NOT_CANCELABLE) {
+                        btnLater.setVisibility(View.GONE);
+                    }
+                    tvTitle.setText(force.getTitle());
+                    tvMessage.setText(force.getMessage());
+                    btnUpdate.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            goToStore(activity.get(), force.getUpdateLink());
+                        }
+                    });
+
+                    btnLater.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+                        }
+                    });
+
+                    dialog.show();
+
+                }
             }
-
-            tvTitle.setText(force.getTitle());
-            tvMessage.setText(force.getMessage());
-            final Force finalForce1 = force;
-            btnUpdate.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    goToStore(activity, finalForce1.getUpdateLink());
-                }
-            });
-            btnLater.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialog.dismiss();
-                }
-            });
-
-            final Force finalForce = force;
-            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialog) {
-                    if(onListen!=null)onListen.onSuccess(finalForce);
-                }
-            });
-
-            dialog.show();
-        }
-
+        });
+        loadJson.execute(url);
     }
 
-    private Force getForce(Activity activity){
+
+    private Force getForce(String json){
         Force force = new Force();
-        SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(activity);
-        String json = preferenceManager.getString(KEY_SAVE,"");
         if(json!=null&&json.length()>0){
             try {
                 JSONObject object = new JSONObject(json);
@@ -167,19 +134,17 @@ public class ForceUpdate {
     }
 
 
-    public interface OnListen{
-        void onSuccess(Force force);
-    }
-
     private void goToStore(Context context, String url) {
         if(url.contains("https://play.google.com/")){
             String MARKET_DETAILS_ID = "market://details?id=";
             String PLAY_STORE_LINK = "https://play.google.com/store/apps/details?id=";
             String link = url.replace(PLAY_STORE_LINK,"");
             try {
-                context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(MARKET_DETAILS_ID +link)));
+                context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(MARKET_DETAILS_ID +link))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             } catch (android.content.ActivityNotFoundException anfe) {
-                context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(PLAY_STORE_LINK +link)));
+                context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(PLAY_STORE_LINK +link))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             }
         }else {
             context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
