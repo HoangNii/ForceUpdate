@@ -19,13 +19,16 @@ public enum  ForceUpdate {
     get;
 
     private String url;
-
+    
+    private int versionCode;
+        
     private Dialog dialog;
 
     private WeakReference<Activity> activity;
 
-    public ForceUpdate setUrl(String s){
+    public ForceUpdate setUrl(String s,int versionCode){
         this.url = s;
+        this.versionCode = versionCode;
         return this;
     }
 
@@ -48,7 +51,7 @@ public enum  ForceUpdate {
 
                 if (force != null) {
 
-                    if (BuildConfig.VERSION_CODE >= force.getAppCode()) return;
+                    if (versionCode >= force.getAppCode()) return;
 
                     if (force.getFlag() == Force.Flag.NOT_SHOW) return;
 
